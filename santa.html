@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Secret Santa</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        :root {
+            --primary-red: #c62828;
+            --dark-red: #8e0000;
+            --light-red: #ff5f52;
+            --green: #2e7d32;
+            --gold: #ffd700;
+            --snow: #fafafa;
+            --dark-text: #333;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            background-image: 
+                radial-gradient(#c62828 2px, transparent 2px),
+                radial-gradient(#2e7d32 2px, transparent 2px);
+            background-size: 50px 50px;
+            background-position: 0 0, 25px 25px;
+            min-height: 100vh;
+            color: var(--dark-text);
+            padding-bottom: 40px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 30px 20px;
+            background: linear-gradient(135deg, var(--primary-red) 0%, var(--dark-red) 100%);
+            color: white;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::before {
+            content: "🎄 🎅 🎁";
+            position: absolute;
+            font-size: 60px;
+            opacity: 0.2;
+            top: 10px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 3.2rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        
+        h1 span {
+            color: var(--gold);
+        }
+        
+        .subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: 20px;
+        }
+        
+        .santa-icon {
+            font-size: 2.5rem;
+            color: var(--gold);
+            margin: 0 10px;
+        }
+        
+        .main-content {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            min-width: 300px;
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .card h2 {
+            color: var(--primary-red);
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px dashed #eee;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card h2 i {
+            color: var(--green);
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--primary-red);
+            outline: none;
+        }
+        
+        button {
+            background: linear-gradient(to right, var(--primary-red), var(--dark-red));
+            color: white;
+            border: none;
+            padding: 14px 25px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            background: linear-gradient(to right, var(--dark-red), var(--primary-red));
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(198, 40, 40, 0.3);
+        }
+        
+        #participantList {
+            list-style-type: none;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+        
+        #participantList li {
+            padding: 12px 15px;
+            background-color: #f9f9f9;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-left: 4px solid var(--primary-red);
+        }
+        
+        #participantList li:nth-child(odd) {
+            background-color: #f0f0f0;
+        }
+        
+        .delete-btn {
+            background-color: #ff5252;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .delete-btn:hover {
+            background-color: #d32f2f;
+        }
+        
+        .instructions {
+            background-color: #fff8e1;
+            border-left: 5px solid var(--gold);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .instructions h3 {
+            color: var(--dark-red);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+            line-height: 1.5;
+        }
+        
+        .result-section {
+            display: none;
+            background-color: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+            margin-top: 30px;
+            text-align: center;
+            border: 2px dashed var(--green);
+        }
+        
+        .result-section h2 {
+            color: var(--green);
+            margin-bottom: 20px;
+        }
+        
+        .result-box {
+            background-color: #f1f8e9;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-size: 1.3rem;
+        }
+        
+        .secret-name {
+            font-size: 2.2rem;
+            color: var(--primary-red);
+            font-weight: bold;
+            margin: 15px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .gift-icon {
+            font-size: 3rem;
+            color: var(--primary-red);
+            margin: 15px;
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .snowflakes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .snowflake {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            opacity: 0.8;
+            animation: fall linear infinite;
+        }
+        
+        @keyframes fall {
+            to {
+                transform: translateY(100vh);
+            }
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #ddd;
+            color: #777;
+        }
+        
+        .counter {
+            font-size: 1.1rem;
+            background-color: var(--primary-red);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .card {
+                min-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="snowflakes" id="snowflakes"></div>
+    
+    <div class="container">
+        <header>
+            <h1><span>Secret</span> Santa <i class="fas fa-gift santa-icon"></i> <span>Class</span> Edition</h1>
+            <p class="subtitle">A magical way to exchange gifts with your classmates</p>
+            <div class="counter">Participants: <span id="participantCount">0</span></div>
+        </header>
+        
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> How It Works</h3>
+            <ol>
+                <li>Each participant registers with their name and email address</li>
+                <li>Once everyone has registered, the organizer clicks "Assign Secret Santas"</li>
+                <li>The system randomly assigns each participant someone to gift</li>
+                <li>Each participant receives an email with the name of their assigned person</li>
+                <li>Keep your assigned person secret until gift exchange day!</li>
+            </ol>
+        </div>
+        
+        <div class="main-content">
+            <div class="card">
+                <h2><i class="fas fa-user-plus"></i> Register Participant</h2>
+                <form id="registrationForm">
+                    <div class="form-group">
+                        <label for="name">Full Name</label>
+                        <input type="text" id="name" placeholder="Enter your full name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" placeholder="Enter your email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="wishlist">Gift Wishlist (Optional)</label>
+                        <textarea id="wishlist" rows="3" placeholder="Share some gift ideas (e.g., books, chocolates, stationery)"></textarea>
+                    </div>
+                    
+                    <button type="submit"><i class="fas fa-check-circle"></i> Add to Secret Santa</button>
+                </form>
+            </div>
+            
+            <div class="card">
+                <h2><i class="fas fa-users"></i> Participants</h2>
+                <ul id="participantList">
+                    <!-- Participants will be added here dynamically -->
+                </ul>
+                
+                <div style="margin-top: 25px; display: flex; gap: 15px;">
+                    <button id="assignButton" style="flex: 2;"><i class="fas fa-random"></i> Assign Secret Santas</button>
+                    <button id="clearButton" style="flex: 1; background: #757575;"><i class="fas fa-trash-alt"></i> Clear All</button>
+                </div>
+                
+                <div style="margin-top: 20px; text-align: center;">
+                    <p><i class="fas fa-envelope" style="color: var(--primary-red);"></i> Each participant will receive their assignment via email</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="result-section" id="resultSection">
+            <h2><i class="fas fa-gift"></i> Your Secret Santa Assignment</h2>
+            <div class="result-box">
+                <p>You are the Secret Santa for:</p>
+                <div class="secret-name" id="assignedPerson">Loading...</div>
+                <p>Their gift suggestions:</p>
+                <p id="giftSuggestions">No suggestions provided</p>
+                <div class="gift-icon">🎁</div>
+                <p>Remember to keep this a secret until gift exchange day!</p>
+            </div>
+            <button id="newAssignmentBtn"><i class="fas fa-redo"></i> Simulate Another Assignment</button>
+        </div>
+        
+        <footer>
+            <p>Made with <i class="fas fa-heart" style="color: var(--primary-red);"></i> for our class | Secret Santa 2023</p>
+            <p style="margin-top: 10px; font-size: 0.9rem;">This website works entirely in your browser. No data is sent to any server.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Create snowflakes
+        function createSnowflakes() {
+            const snowflakesContainer = document.getElementById('snowflakes');
+            const snowflakeCount = 50;
+            
+            for (let i = 0; i < snowflakeCount; i++) {
+                const snowflake = document.createElement('div');
+                snowflake.classList.add('snowflake');
+                
+                // Random size between 5 and 15px
+                const size = Math.random() * 10 + 5;
+                snowflake.style.width = `${size}px`;
+                snowflake.style.height = `${size}px`;
+                
+                // Random position
+                snowflake.style.left = `${Math.random() * 100}vw`;
+                
+                // Random opacity
+                snowflake.style.opacity = Math.random() * 0.5 + 0.3;
+                
+                // Random animation duration
+                const duration = Math.random() * 10 + 10;
+                snowflake.style.animationDuration = `${duration}s`;
+                
+                // Random animation delay
+                snowflake.style.animationDelay = `${Math.random() * 5}s`;
+                
+                snowflakesContainer.appendChild(snowflake);
+            }
+        }
+        
+        // Participant data storage
+        let participants = JSON.parse(localStorage.getItem('secretSantaParticipants')) || [];
+        let assignments = JSON.parse(localStorage.getItem('secretSantaAssignments')) || {};
+        
+        // DOM elements
+        const registrationForm = document.getElementById('registrationForm');
+        const participantList = document.getElementById('participantList');
+        const participantCount = document.getElementById('participantCount');
+        const assignButton = document.getElementById('assignButton');
+        const clearButton = document.getElementById('clearButton');
+        const resultSection = document.getElementById('resultSection');
+        const assignedPersonElement = document.getElementById('assignedPerson');
+        const giftSuggestionsElement = document.getElementById('giftSuggestions');
+        const newAssignmentBtn = document.getElementById('newAssignmentBtn');
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            createSnowflakes();
+            updateParticipantList();
+            
+            // Load existing assignment if available
+            if (localStorage.getItem('currentAssignment')) {
+                showAssignment(
+                    localStorage.getItem('currentAssignmentName'),
+                    localStorage.getItem('currentAssignmentWishlist')
+                );
+            }
+        });
+        
+        // Register new participant
+        registrationForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const wishlist = document.getElementById('wishlist').value.trim();
+            
+            // Check if participant already exists
+            if (participants.some(p => p.email === email)) {
+                alert('This email is already registered!');
+                return;
+            }
+            
+            // Add participant
+            participants.push({
+                name: name,
+                email: email,
+                wishlist: wishlist || "No suggestions provided"
+            });
+            
+            // Save to localStorage
+            localStorage.setItem('secretSantaParticipants', JSON.stringify(participants));
+            
+            // Update UI
+            updateParticipantList();
+            
+            // Clear form
+            registrationForm.reset();
+            
+            // Show success message
+            alert(`${name} has been added to the Secret Santa!`);
+        });
+        
+        // Update participant list
+        function updateParticipantList() {
+            participantList.innerHTML = '';
+            participantCount.textContent = participants.length;
+            
+            if (participants.length === 0) {
+                participantList.innerHTML = '<li style="text-align: center; color: #777;">No participants yet. Add the first one!</li>';
+                assignButton.disabled = true;
+                assignButton.style.opacity = '0.6';
+                assignButton.style.cursor = 'not-allowed';
+                return;
+            } else {
+                assignButton.disabled = false;
+                assignButton.style.opacity = '1';
+                assignButton.style.cursor = 'pointer';
+            }
+            
+            participants.forEach((participant, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div>
+                        <strong>${participant.name}</strong>
+                        <div style="font-size: 0.9rem; color: #666;">${participant.email}</div>
+                    </div>
+                    <button class="delete-btn" data-index="${index}"><i class="fas fa-times"></i></button>
+                `;
+                participantList.appendChild(li);
+            });
+            
+            // Add event listeners to delete buttons
+            document.querySelectorAll('.delete-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.getAttribute('data-index'));
+                    deleteParticipant(index);
+                });
+            });
+        }
+        
+        // Delete participant
+        function deleteParticipant(index) {
+            const participantName = participants[index].name;
+            if (confirm(`Remove ${participantName} from Secret Santa?`)) {
+                participants.splice(index, 1);
+                localStorage.setItem('secretSantaParticipants', JSON.stringify(participants));
+                updateParticipantList();
+            }
+        }
+        
+        // Assign Secret Santas
+        assignButton.addEventListener('click', function() {
+            if (participants.length < 3) {
+                alert('You need at least 3 participants for Secret Santa!');
+                return;
+            }
+            
+            // Create assignments
+            assignSecretSantas();
+            
+            // Show a random assignment as an example
+            const randomParticipant = participants[Math.floor(Math.random() * participants.length)];
+            const assignment = assignments[randomParticipant.email];
+            const assignedPerson = participants.find(p => p.email === assignment);
+            const wishlist = assignedPerson ? assignedPerson.wishlist : "No suggestions provided";
+            
+            showAssignment(assignedPerson.name, wishlist);
+            
+            // Show success message
+            alert(`Secret Santas have been assigned! Each participant will receive an email with their assignment.`);
+        });
+        
+        // Clear all participants
+        clearButton.addEventListener('click', function() {
+            if (participants.length === 0) {
+                alert('No participants to clear!');
+                return;
+            }
+            
+            if (confirm('Are you sure you want to remove all participants? This cannot be undone.')) {
+                participants = [];
+                assignments = {};
+                localStorage.removeItem('secretSantaParticipants');
+                localStorage.removeItem('secretSantaAssignments');
+                localStorage.removeItem('currentAssignment');
+                localStorage.removeItem('currentAssignmentName');
+                localStorage.removeItem('currentAssignmentWishlist');
+                updateParticipantList();
+                resultSection.style.display = 'none';
+            }
+        });
+        
+        // Assign Secret Santas algorithm
+        function assignSecretSantas() {
+            // Reset assignments
+            assignments = {};
+            
+            // Create a shuffled copy of participants
+            let shuffled = [...participants].sort(() => Math.random() - 0.5);
+            
+            // Assign each participant someone to gift (ensuring no one gets themselves)
+            let isValidAssignment = false;
+            let attempts = 0;
+            
+            while (!isValidAssignment && attempts < 100) {
+                isValidAssignment = true;
+                assignments = {};
+                
+                for (let i = 0; i < participants.length; i++) {
+                    const giver = participants[i];
+                    let receiverIndex = (i + 1) % participants.length;
+                    
+                    // Ensure no one gets themselves
+                    if (shuffled[receiverIndex].email === giver.email) {
+                        // If they would get themselves, swap with next person
+                        receiverIndex = (receiverIndex + 1) % participants.length;
+                    }
+                    
+                    assignments[giver.email] = shuffled[receiverIndex].email;
+                }
+                
+                // Check if any person is assigned to themselves
+                for (const giverEmail in assignments) {
+                    if (giverEmail === assignments[giverEmail]) {
+                        isValidAssignment = false;
+                        break;
+                    }
+                }
+                
+                // Reshuffle for next attempt
+                shuffled = [...participants].sort(() => Math.random() - 0.5);
+                attempts++;
+            }
+            
+            // Save assignments
+            localStorage.setItem('secretSantaAssignments', JSON.stringify(assignments));
+            
+            // In a real application, you would send emails here
+            console.log("Assignments:", assignments);
+        }
+        
+        // Show assignment result
+        function showAssignment(name, wishlist) {
+            assignedPersonElement.textContent = name;
+            giftSuggestionsElement.textContent = wishlist;
+            resultSection.style.display = 'block';
+            
+            // Save to localStorage
+            localStorage.setItem('currentAssignment', 'true');
+            localStorage.setItem('currentAssignmentName', name);
+            localStorage.setItem('currentAssignmentWishlist', wishlist);
+            
+            // Scroll to result
+            resultSection.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        // Simulate another assignment (for demo purposes)
+        newAssignmentBtn.addEventListener('click', function() {
+            if (participants.length < 3) {
+                alert('You need at least 3 participants for Secret Santa!');
+                return;
+            }
+            
+            // Get a random participant
+            const randomParticipant = participants[Math.floor(Math.random() * participants.length)];
+            
+            // Get a random different participant as assignment
+            let assignedPerson;
+            do {
+                assignedPerson = participants[Math.floor(Math.random() * participants.length)];
+            } while (assignedPerson.email === randomParticipant.email);
+            
+            showAssignment(assignedPerson.name, assignedPerson.wishlist);
+        });
+    </script>
+</body>
+</html>
